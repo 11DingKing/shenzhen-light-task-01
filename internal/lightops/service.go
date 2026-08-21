@@ -34,7 +34,7 @@ func (s *Service) SubmitComplaint(ctx context.Context, complaint Complaint, key 
 	if _, ok := s.store.complaints[complaint.ID]; ok {
 		return Complaint{}, ErrConflict
 	}
-	complaint.Status, complaint.Version, complaint.Evidence = "pending", 1, slices.Clone(complaint.Evidence)
+	complaint.Status, complaint.Version, complaint.Evidence = "pending", 1, retainComplaintEvidence(complaint.Evidence)
 	s.store.complaints[complaint.ID] = complaint
 	if err := s.store.appendEventLocked(Event{ID: complaint.ID + "-submitted", DistrictID: complaint.DistrictID, EntityID: complaint.ID, Action: "complaint.submitted", Metadata: map[string]string{"resident": complaint.ResidentID}}); err != nil {
 		delete(s.store.complaints, complaint.ID)
